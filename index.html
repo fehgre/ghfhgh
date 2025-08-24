@@ -7811,31 +7811,10 @@ document.head.appendChild(swipeStyle);
 </script>
 
 <script>
-function preventSwipe(e) {
-    // Блокируем "pull-to-close" (свайп вниз от верхнего края)
-    if (e.touches && e.touches.length === 1 && e.touches[0].clientY < 50 && e.deltaY <= 0) {
-        e.preventDefault();
-    }
-}
-
-// Подключаем защиту
 document.addEventListener('DOMContentLoaded', function() {
-    // Стили для отключения overscroll
-    const style = document.createElement('style');
-    style.textContent = `
-        html, body {
-            overscroll-behavior: none !important;
-            -webkit-overflow-scrolling: auto !important;
-        }
-    `;
-    document.head.appendChild(style);
-
-    // Перехватываем жесты
-    document.addEventListener('touchmove', function(e) {
-        if (e.touches[0].clientY < 50) {
-            e.preventDefault();
-        }
-    }, { passive: false });
+    if (window.Telegram && Telegram.WebApp) {
+        Telegram.WebApp.disableVerticalSwipes();
+    }
 });
 </script>
   
