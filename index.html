@@ -7817,7 +7817,215 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-
   
+<script>
+// ===== УНИВЕРСАЛЬНАЯ СИСТЕМА ВИБРАЦИИ =====
+(function() {
+  // Создаем глобальную функцию вибрации
+  window.triggerUniversalVibration = function() {
+    // 1. Пытаемся использовать стандартный API вибрации
+    if (navigator.vibrate) {
+      try {
+        navigator.vibrate(50);
+        return;
+      } catch (e) {
+        console.log('Standard vibration API failed');
+      }
+    }
+    
+    // 2. Пытаемся использовать Telegram WebApp Haptic Feedback
+    if (window.Telegram?.WebApp?.HapticFeedback) {
+      try {
+        Telegram.WebApp.HapticFeedback.impactOccurred('light');
+        return;
+      } catch (e) {
+        console.log('Telegram HapticFeedback failed');
+      }
+    }
+    
+    // 3. Резервный вариант: создаем визуальную "вибрацию" для iOS
+    createVisualFeedback();
+  };
+  
+  // Визуальная обратная связь для устройств без вибрации
+  function createVisualFeedback() {
+    const feedback = document.createElement('div');
+    feedback.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.01);
+      z-index: 9999;
+      pointer-events: none;
+      animation: vibrate 0.15s linear;
+    `;
+    
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes vibrate {
+        0% { transform: translateX(0); }
+        25% { transform: translateX(-2px); }
+        50% { transform: translateX(0); }
+        75% { transform: translateX(2px); }
+        100% { transform: translateX(0); }
+      }
+    `;
+    
+    document.head.appendChild(style);
+    document.body.appendChild(feedback);
+    
+    setTimeout(() => {
+      document.body.removeChild(feedback);
+      document.head.removeChild(style);
+    }, 150);
+  }
+  
+  // Перехватываем все клики
+  document.addEventListener('click', function(e) {
+    // Игнорируем клики по скроллбарам и некоторым элементам
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    
+    triggerUniversalVibration();
+  }, true); // Используем capture phase для перехвата всех кликов
+  
+  // Перехватываем все touch события
+  document.addEventListener('touchstart', function() {
+    triggerUniversalVibration();
+  }, { passive: true });
+  
+  // Перехватываем все свайпы
+  let touchStartTime = 0;
+  document.addEventListener('touchstart', function() {
+    touchStartTime = Date.now();
+  }, { passive: true });
+  
+  document.addEventListener('touchend', function(e) {
+    // Вибрируем только если касание было коротким (не долгим нажатием)
+    if (Date.now() - touchStartTime < 500) {
+      triggerUniversalVibration();
+    }
+  }, { passive: true });
+  
+  // Перехватываем все изменения в формах
+  const originalValueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+  Object.defineProperty(HTMLInputElement.prototype, 'value', {
+    set: function(value) {
+      if (this.type !== 'text' && this.type !== 'textarea') {
+        triggerUniversalVibration();
+      }
+      originalValueSetter.call(this, value);
+    }
+  });
+  
+  // Перехватываем все программные изменения
+  const originalDispatchEvent = EventTarget.prototype.dispatchEvent;
+  EventTarget.prototype.dispatchEvent = function(event) {
+    if (event.type.includes('click') || event.type.includes('touch')) {
+      setTimeout(triggerUniversalVibration, 10);
+    }
+    return originalDispatchEvent.call(this, event);
+  };
+  
+  console.log('Universal Vibration System activated!');
+})();
+
+// ===== ПЕРЕОПРЕДЕЛЕНИЕ ВАШИХ ФУНКЦИЙ С ВИБРАЦИЕЙ =====
+// Сохраняем оригинальные функции
+const originalInitUserData = window.initUserData;
+const originalShowPage = window.showPage;
+const originalAddToCart = window.addToCart;
+const originalShowProductsPage = window.showProductsPage;
+const originalHideProductsPage = window.hideProductsPage;
+const originalShowProductModal = window.showProductModal;
+const originalCloseModal = window.closeModal;
+const originalAddToCartFromModal = window.addToCartFromModal;
+const originalToggleCategories = window.toggleCategories;
+const originalSelectCategory = window.selectCategory;
+const originalChangeLevel = window.changeLevel;
+const originalOpenCareerPopup = window.openCareerPopup;
+const originalCloseCareerPopup = window.closeCareerPopup;
+const originalPrevMonth = window.prevMonth;
+const originalNextMonth = window.nextMonth;
+const originalGoBackToCabinet = window.goBackToCabinet;
+const originalShowExpensesPage = window.showExpensesPage;
+const originalHideExpensesPage = window.hideExpensesPage;
+const originalShowProfilePage = window.showProfilePage;
+const originalHideProfilePage = window.hideProfilePage;
+const originalShowPaymentPage = window.showPaymentPage;
+const originalHidePaymentPage = window.hidePaymentPage;
+const originalShowAddCardModal = window.showAddCardModal;
+const originalHideAddCardModal = window.hideAddCardModal;
+const originalShowCardModal = window.showCardModal;
+const originalSaveCard = window.saveCard;
+const originalDeleteCard = window.deleteCard;
+const originalSetAmount = window.setAmount;
+const originalStartVoiceInput = window.startVoiceInput;
+const originalProcessPayment = window.processPayment;
+const originalShowReviewsPage = window.showReviewsPage;
+const originalHideReviewsPage = window.hideReviewsPage;
+const originalSubmitReview = window.submitReview;
+
+// Переопределяем функции с добавлением вибрации
+window.initUserData = function() { triggerUniversalVibration(); return originalInitUserData?.apply(this, arguments); };
+window.showPage = function() { triggerUniversalVibration(); return originalShowPage?.apply(this, arguments); };
+window.addToCart = function() { triggerUniversalVibration(); return originalAddToCart?.apply(this, arguments); };
+window.showProductsPage = function() { triggerUniversalVibration(); return originalShowProductsPage?.apply(this, arguments); };
+window.hideProductsPage = function() { triggerUniversalVibration(); return originalHideProductsPage?.apply(this, arguments); };
+window.showProductModal = function() { triggerUniversalVibration(); return originalShowProductModal?.apply(this, arguments); };
+window.closeModal = function() { triggerUniversalVibration(); return originalCloseModal?.apply(this, arguments); };
+window.addToCartFromModal = function() { triggerUniversalVibration(); return originalAddToCartFromModal?.apply(this, arguments); };
+window.toggleCategories = function() { triggerUniversalVibration(); return originalToggleCategories?.apply(this, arguments); };
+window.selectCategory = function() { triggerUniversalVibration(); return originalSelectCategory?.apply(this, arguments); };
+window.changeLevel = function() { triggerUniversalVibration(); return originalChangeLevel?.apply(this, arguments); };
+window.openCareerPopup = function() { triggerUniversalVibration(); return originalOpenCareerPopup?.apply(this, arguments); };
+window.closeCareerPopup = function() { triggerUniversalVibration(); return originalCloseCareerPopup?.apply(this, arguments); };
+window.prevMonth = function() { triggerUniversalVibration(); return originalPrevMonth?.apply(this, arguments); };
+window.nextMonth = function() { triggerUniversalVibration(); return originalNextMonth?.apply(this, arguments); };
+window.goBackToCabinet = function() { triggerUniversalVibration(); return originalGoBackToCabinet?.apply(this, arguments); };
+window.showExpensesPage = function() { triggerUniversalVibration(); return originalShowExpensesPage?.apply(this, arguments); };
+window.hideExpensesPage = function() { triggerUniversalVibration(); return originalHideExpensesPage?.apply(this, arguments); };
+window.showProfilePage = function() { triggerUniversalVibration(); return originalShowProfilePage?.apply(this, arguments); };
+window.hideProfilePage = function() { triggerUniversalVibration(); return originalHideProfilePage?.apply(this, arguments); };
+window.showPaymentPage = function() { triggerUniversalVibration(); return originalShowPaymentPage?.apply(this, arguments); };
+window.hidePaymentPage = function() { triggerUniversalVibration(); return originalHidePaymentPage?.apply(this, arguments); };
+window.showAddCardModal = function() { triggerUniversalVibration(); return originalShowAddCardModal?.apply(this, arguments); };
+window.hideAddCardModal = function() { triggerUniversalVibration(); return originalHideAddCardModal?.apply(this, arguments); };
+window.showCardModal = function() { triggerUniversalVibration(); return originalShowCardModal?.apply(this, arguments); };
+window.saveCard = function() { triggerUniversalVibration(); return originalSaveCard?.apply(this, arguments); };
+window.deleteCard = function() { triggerUniversalVibration(); return originalDeleteCard?.apply(this, arguments); };
+window.setAmount = function() { triggerUniversalVibration(); return originalSetAmount?.apply(this, arguments); };
+window.startVoiceInput = function() { triggerUniversalVibration(); return originalStartVoiceInput?.apply(this, arguments); };
+window.processPayment = function() { triggerUniversalVibration(); return originalProcessPayment?.apply(this, arguments); };
+window.showReviewsPage = function() { triggerUniversalVibration(); return originalShowReviewsPage?.apply(this, arguments); };
+window.hideReviewsPage = function() { triggerUniversalVibration(); return originalHideReviewsPage?.apply(this, arguments); };
+window.submitReview = function() { triggerUniversalVibration(); return originalSubmitReview?.apply(this, arguments); };
+
+// Также перехватываем навигацию по вкладкам
+const originalTabClick = tabItems[0]?.onclick;
+if (tabItems.length) {
+  tabItems.forEach(tab => {
+    const originalClick = tab.onclick;
+    tab.onclick = function(e) {
+      triggerUniversalVibration();
+      if (originalClick) originalClick.call(this, e);
+    };
+  });
+}
+
+// Перехватываем навигацию в bottom nav
+
+navItems.forEach(item => {
+  const originalClick = item.onclick;
+  item.onclick = function(e) {
+    triggerUniversalVibration();
+    if (originalClick) originalClick.call(this, e);
+  };
+});
+
+console.log('All functions wrapped with vibration!');
+</script>
+
 </body>
 </html>
